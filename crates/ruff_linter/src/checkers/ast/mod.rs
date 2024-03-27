@@ -322,16 +322,16 @@ impl<'a> Visitor<'a> for Checker<'a> {
         // Step 0: Pre-processing
         self.semantic.push_node(stmt);
 
-        // For Jupyter Notebooks, we'll reset the `IMPORT_BOUNDARY` flag when
-        // we encounter a cell boundary.
+        // For Jupyter Notebooks, reset the IMPORT_BOUNDARY and MODULE_DOCSTRING_BOUNDARY flags
+        // when we encounter a cell boundary.
         if self.source_type.is_ipynb()
             && self.semantic.at_top_level()
-            && self.semantic.seen_import_boundary()
             && self.cell_offsets.is_some_and(|cell_offsets| {
                 cell_offsets.has_cell_boundary(TextRange::new(self.last_stmt_end, stmt.start()))
             })
         {
             self.semantic.flags -= SemanticModelFlags::IMPORT_BOUNDARY;
+            self.semantic.flags -= SemanticModelFlags::MODULE_DOCSTRING_BOUNDARY;
         }
 
         // Track whether we've seen module docstrings, non-imports, etc.
